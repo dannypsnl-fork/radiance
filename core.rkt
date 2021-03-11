@@ -8,7 +8,7 @@
    [number (num)])
   (Expr (e)
         id
-        (cons e* ...)
+        (record e* ...)
         (lambda (tele* ...) e)
         (pi (tele* ...) e)
         (sigma (tele* ...) e)
@@ -25,8 +25,8 @@
      [,id (if (hash-ref m id #f)
               (hash-ref m id)
               id)]
-     [(cons ,[e*] ...)
-      `(cons ,e* ...)]
+     [(record ,[e*] ...)
+      `(record ,e* ...)]
      [(lambda (,tele* ...) ,e)
       (define m2 (hash-copy m))
       (for ([tele tele*])
@@ -73,9 +73,9 @@
    (unparse-Core
     (β-reduce (parse-core
                '(app (lambda ([explicit x A] [explicit y A])
-                       (cons x y))
+                       (record x y))
                      a b))))
-   '(cons a b))
+   '(record a b))
 
   ; should escape
   (check-equal?
