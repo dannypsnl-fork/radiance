@@ -67,17 +67,22 @@
 (define-parser parse-core Core)
 
 (module+ test
-  (unparse-Core (parse-core '(cons n m)))
+  (require rackunit)
 
-  (unparse-Core
-   (β-reduce (parse-core
-              '(app (lambda ([explicit x A] [explicit y A])
-                      (cons x y))
-                    a b))))
+  (check-equal?
+   (unparse-Core
+    (β-reduce (parse-core
+               '(app (lambda ([explicit x A] [explicit y A])
+                       (cons x y))
+                     a b))))
+   '(cons a b))
+
   ; should escape
-  (unparse-Core
-   (β-reduce (parse-core
-              '(app (lambda ([explicit x A])
-                      (lambda ([explicit x A])
-                        x))
-                    a)))))
+  (check-equal?
+   (unparse-Core
+    (β-reduce (parse-core
+               '(app (lambda ([explicit x A])
+                       (lambda ([explicit x A])
+                         x))
+                     a))))
+   '(lambda ([explicit x A]) x)))
