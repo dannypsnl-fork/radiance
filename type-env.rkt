@@ -25,7 +25,11 @@
      (define new-env (make-TypeEnv param-typs tyenv))
      (Pi tele+ (typeof new-env body))]
     [id #:when (symbol? term)
-        (define r? (hash-ref (TypeEnv-binds tyenv) id #f))
+        (define r? (hash-ref (TypeEnv-binds tyenv) id
+                             (λ ()
+                               (if (TypeEnv-parent tyenv)
+                                   (typeof (TypeEnv-parent tyenv) id)
+                                   #f))))
         (unless r?
           (error 'not-found "~a" id))
         r?]))
