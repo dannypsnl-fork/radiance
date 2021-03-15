@@ -30,6 +30,12 @@
 (hash-set! type-env 'Nat 'Type)
 (define value-env (make-hash))
 
+(define (type-> exp act)
+  (unless (equal? exp act)
+    (error 'type-mismatched
+           "~a <=> ~a"
+           exp act)))
+
 (define-pass <-type : Core (e) -> Core ()
   (I : Expr (e) -> Expr ()
      [,id (hash-ref type-env id)]
@@ -40,10 +46,7 @@
      [(app ,[e1] ,[e2])
       (nanopass-case (Core Type) e1
                      [(pi (,id ,ty) ,e)
-                      (unless (equal? ty e2)
-                        (error 'type-mismatched
-                               "~a <=> ~a"
-                               ty e2))
+                      (type-> ty e2)
                       e]
                      [else (error 'non-appliable)])])
   (I e))
@@ -52,10 +55,7 @@
   (C : Stmt (s) -> * ()
      [(define ,id ,ty ,e)
       (hash-set! type-env id (concrete->core ty))
-      (unless (equal? (concrete->core ty) (<-type (concrete->core e)))
-        (error 'type-mismatched
-               "~a <=> ~a"
-               ty (<-type (concrete->core e))))
+      (type-> (concrete->core ty) (<-type (concrete->core e)))
       (hash-set! value-env id (concrete->core e))
       (void)])
   (C s))
@@ -65,7 +65,7 @@
 (ty-check (parse '(define zero Nat zero)))
 (ty-check (parse '(define suc (pi (x Nat) Nat)
                     (lambda (x Nat) Nat (record suc x)))))
-(ty-check (parse '(define three Nat (app suc (app suc zero)))))
+(ty-check (parse '(define three Nat (app suc (app suc (app suc zero))))))
 
 (displayln type-env)
 (displayln value-env)
