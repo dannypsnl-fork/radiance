@@ -47,6 +47,7 @@
       (nanopass-case (Core Type) e1
                      [(pi (,id ,ty) ,e)
                       (type-> ty e2)
+                      ; FIXME: subst id in e
                       e]
                      [else (error 'non-appliable)])])
   (I e))
