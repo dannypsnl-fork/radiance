@@ -27,7 +27,6 @@
 
 (define type-env (make-hash))
 (hash-set! type-env 'Type 'Type1)
-(hash-set! type-env 'Nat 'Type)
 (define value-env (make-hash))
 
 (define (type-> exp act)
@@ -35,6 +34,17 @@
     (error 'type-mismatched
            "~a <=> ~a"
            exp act)))
+
+(define-pass subst : Core (e id2) -> Core ()
+  (S : Expr (e) -> Expr ()
+     [,id (if (equal? id id2)
+              id2
+              id)]
+     [(lambda (,id ,ty) ,ty2 ,e)
+      (if (equal? id id2)
+          `(lambda (,id ,ty) ,ty2 ,e)
+          `(lambda (,id ,ty) ,ty2 ,(subst e id2)))])
+  (S e))
 
 (define-pass <-type : Core (e) -> Core ()
   (I : Expr (e) -> Expr ()
@@ -47,8 +57,7 @@
       (nanopass-case (Core Type) e1
                      [(pi (,id ,ty) ,e)
                       (type-> ty e2)
-                      ; FIXME: subst id in e
-                      e]
+                      (subst e id)]
                      [else (error 'non-appliable)])])
   (I e))
 
@@ -63,10 +72,26 @@
 
 (define-parser parse Concrete)
 
+(hash-set! type-env 'Nat 'Type)
+(hash-set! type-env 'Vec '(pi (a Type)
+                              (pi (len Nat)
+                                  Type)))
+
 (ty-check (parse '(define zero Nat zero)))
 (ty-check (parse '(define suc (pi (x Nat) Nat)
                     (lambda (x Nat) Nat (record suc x)))))
+
+(ty-check (parse '(define nil (sigma [T Type] (app (app Vec T) zero)) nil)))
+#;(ty-check (parse '(define :: (sigma (T Type) (sigma (n Nat)
+                                                    (pi [v (app (app Vec T) n)]
+                                                        (pi [e T] (app (app Vec T) (app suc n))))))
+                    (sigma (T Type)
+                           (sigma (n Nat)
+                                  (lambda (v (app (app Vec T) n))
+                                    (lambda (e T)
+                                      (record (record :: v) e))))))))
+
 (ty-check (parse '(define three Nat (app suc (app suc (app suc zero))))))
 
-(displayln type-env)
-(displayln value-env)
+(hash-ref type-env 'nil)
+(hash-ref value-env 'nil)
