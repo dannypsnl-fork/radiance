@@ -14,15 +14,40 @@
 ; parse
 (define (parse filename input)
   (parameterize ([current-parser (make-parser filename input)])
-    (define ind (parse-inductive))
-    (module "" (list ind))))
+    (consume 'module)
+    (define mod-name (token-val (consume 'identifier)))
+    (let loop ([inductive* '()])
+      (cond
+        [(predict? 'inductive)
+         (define ind (parse-inductive))
+         (loop (append inductive* (list ind)))]
+        [else (module mod-name inductive*)]))))
 
 (define (parse-inductive)
   (consume 'inductive)
   (define name (token-val (consume 'identifier)))
   (consume ':)
-  (define typ (token-val (consume 'identifier)))
-  (inductive name))
+  (define typ (parse-type))
+  (let loop ([constructor* '()])
+    (cond
+      [(predict? 'identifier)
+       (define c (parse-constructor))
+       (loop (cons c constructor*))]
+      [else (inductive name constructor*)])))
+
+(define (parse-constructor)
+  (define name (token-val (consume 'identifier)))
+  (consume ':)
+  (define typ (parse-type))
+  (constructor name typ))
+
+(define (parse-type)
+  (define t (token-val (consume 'identifier)))
+  (if (predict? '->)
+      (begin (consume '->)
+             (pi (list (telescope (gensym 'param) t))
+                 (parse-type)))
+      t))
 
 ; helper
 (struct parser (name lexer tokens offset)

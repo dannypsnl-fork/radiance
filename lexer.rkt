@@ -19,7 +19,7 @@
   l)
 
 (define keyword*
-  '("inductive"))
+  '("module" "inductive"))
 
 ; state functions
 (define (lex-white-space l)
@@ -38,7 +38,7 @@
          (emit l ':)
          lex-white-space]
     [#\- (next l)
-         (if (eq? (peek l) '>)
+         (if (eq? (peek l) #\>)
              (begin
                (next l)
                (emit l '->))
