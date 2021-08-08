@@ -1,5 +1,0 @@
-module Basic
-
-inductive Nat : Type
-  z : Nat
-  s : Nat -> Nat

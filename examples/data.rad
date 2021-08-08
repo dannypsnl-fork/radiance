@@ -1,0 +1,13 @@
+module Data
+
+inductive Zero : Type
+inductive One : Type
+  one : One
+
+inductive Bool : Type
+  true : Bool
+  false : Bool
+
+inductive Nat : Type
+  z : Nat
+  s : Nat -> Nat
