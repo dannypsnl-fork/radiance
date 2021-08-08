@@ -180,11 +180,9 @@
     (pos "test" l c))
 
   (test-case "lexing"
-             (define l (lex "test" (open-input-string "31+12 abc")))
+             (define l (lex "test" (open-input-string "31 12 abc")))
              (check-equal? (channel-get (lexer-tokens l))
                            (token 'number "31" (test-pos 1 0) (test-pos 1 2)))
-             (check-equal? (channel-get (lexer-tokens l))
-                           (token 'add "+" (test-pos 1 2) (test-pos 1 3)))
              (check-equal? (channel-get (lexer-tokens l))
                            (token 'number "12" (test-pos 1 3) (test-pos 1 5)))
              (check-equal? (channel-get (lexer-tokens l))
@@ -196,23 +194,6 @@
                            (token 'identifier "abc" (test-pos 1 2) (test-pos 1 5))))
 
   (test-case "keywords"
-             (define l (lex "test" (open-input-string "true false")))
+             (define l (lex "test" (open-input-string "inductive")))
              (check-equal? (channel-get (lexer-tokens l))
-                           (token 'true "true" (test-pos 1 0) (test-pos 1 4)))
-             (check-equal? (channel-get (lexer-tokens l))
-                           (token 'false "false" (test-pos 1 5) (test-pos 1 10))))
-
-  (test-case "longer expression"
-             (define l (lex "test" (open-input-string "1 + 2 * 3")))
-             (check-equal? (channel-get (lexer-tokens l))
-                           (token 'number "1" (test-pos 1 0) (test-pos 1 1)))
-             (check-equal? (channel-get (lexer-tokens l))
-                           (token 'add "+" (test-pos 1 2) (test-pos 1 3)))
-             (check-equal? (channel-get (lexer-tokens l))
-                           (token 'number "2" (test-pos 1 4) (test-pos 1 5)))
-             (check-equal? (channel-get (lexer-tokens l))
-                           (token 'mul "*" (test-pos 1 6) (test-pos 1 7)))
-             (check-equal? (channel-get (lexer-tokens l))
-                           (token 'number "3" (test-pos 1 8) (test-pos 1 9))))
-
-  )
+                           (token 'inductive "inductive" (test-pos 1 0) (test-pos 1 9)))))
