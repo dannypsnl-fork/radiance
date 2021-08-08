@@ -1,31 +1,12 @@
-#lang nanopass
+#lang typed/racket
 
-(define-language Concrete
-  (entry Stmt)
-  (terminals
-   [symbol (id)]
-   [number (num)])
-  (Stmt (s)
-        (data id ctor* ...))
-  (Ctor (ctor)
-        (id ty))
-  (Expr (e)
-        id
-        (λ (tele* ...) e)
-        (-> ty* ... ty)
-        (Π (tele* ...) e)
-        (record e* ...)
-        (Σ (tele* ...) e)
-        (app e e* ...)
-        (type level))
-  (Telescope (tele)
-             (id ty))
-  (Type (ty) e)
-  (Level (level) num))
+(provide (all-defined-out))
 
-(define-parser parse-concrete Concrete)
+(struct module
+  ([filename : String]
+   [inductive* : (Listof inductive)])
+  #:transparent)
 
-(parse-concrete
- '(data Nat
-        [z Nat]
-        [s (-> Nat Nat)]))
+(struct inductive
+  ([name : String])
+  #:transparent)
